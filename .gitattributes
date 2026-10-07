@@ -1,0 +1,14 @@
+# Normaliza quebras de linha (evita diferenças falsas entre Windows e Linux)
+* text=auto
+
+*.py      text
+*.ipynb   text
+*.csv     text
+*.md      text
+*.html    text
+
+*.db      binary
+*.sqlite  binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary

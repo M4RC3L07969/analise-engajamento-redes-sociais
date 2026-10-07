@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Ambientes virtuais e variáveis de ambiente
+.venv/
+venv/
+env/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Streamlit (nunca subir senhas/chaves)
+.streamlit/secrets.toml
+
+# SQLite: o banco em database/ é versionado; arquivos temporários não
+*.db-journal
+*.sqlite-journal
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
