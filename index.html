@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise de Engajamento em Redes Sociais</title>
+  <meta name="description" content="Projeto de análise e visualização de dados sobre engajamento em redes sociais (2015–2024) com Python, Pandas, Plotly e Streamlit.">
+  <style>
+    :root {
+      --azul: #2a78d6;
+      --azul-escuro: #1d5aa5;
+      --texto: #1f2328;
+      --texto-suave: #57606a;
+      --fundo: #ffffff;
+      --fundo-suave: #f5f7fa;
+      --borda: #d8dee4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--texto);
+      background: var(--fundo);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1d5aa5, #2a78d6);
+      color: #fff;
+      padding: 56px 20px 48px;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+    header .tag {
+      display: inline-block;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    header h1 { font-size: 2.3rem; line-height: 1.2; margin: 0 0 12px; }
+    header p { font-size: 1.1rem; margin: 0 0 24px; opacity: 0.95; max-width: 720px; }
+
+    .botoes { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .botao {
+      display: inline-block;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 2px solid #fff;
+      color: #fff;
+    }
+
+    .botao.principal { background: #fff; color: var(--azul-escuro); }
+    .botao:hover { opacity: 0.9; }
+
+    main section { padding: 40px 0 8px; }
+    main h2 { font-size: 1.5rem; margin: 0 0 16px; border-left: 4px solid var(--azul); padding-left: 12px; }
+    main h3 { margin: 28px 0 8px; font-size: 1.15rem; }
+    a { color: var(--azul); }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .kpi {
+      background: var(--fundo-suave);
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .kpi span { display: block; color: var(--texto-suave); font-size: 0.9rem; }
+    .kpi strong { display: block; font-size: 1.6rem; margin-top: 2px; }
+    .kpi small { color: var(--texto-suave); }
+
+    figure { margin: 12px 0 0; }
+    figure img { width: 100%; height: auto; border: 1px solid var(--borda); border-radius: 8px; }
+    figcaption { color: var(--texto-suave); font-size: 0.9rem; margin-top: 6px; }
+
+    .tecnologias { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; }
+    .tecnologias li {
+      background: var(--fundo-suave);
+      border: 1px solid var(--borda);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.95rem;
+    }
+
+    .aviso {
+      background: #fff8e6;
+      border: 1px solid #f0d58c;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+    th { background: var(--fundo-suave); }
+
+    footer {
+      margin-top: 48px;
+      padding: 24px 0;
+      border-top: 1px solid var(--borda);
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 40px 0 36px; }
+      header h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <span class="tag">Projeto G1 · Análise e Visualização de Dados com Python · Tema 20</span>
+    <h1>Análise de Engajamento em Redes Sociais</h1>
+    <p>Análise de 4.440 publicações feitas entre 2015 e 2024 para entender quais plataformas, formatos e horários geram mais engajamento.</p>
+    <div class="botoes">
+      <a class="botao principal" href="https://analise-engajamento-redes-sociais.streamlit.app" target="_blank" rel="noopener">Abrir o dashboard</a>
+      <a class="botao" href="https://github.com/M4RC3L07969/analise-engajamento-redes-sociais/blob/main/notebooks/analise_redes_sociais.ipynb" target="_blank" rel="noopener">Ver o notebook</a>
+      <a class="botao" href="https://github.com/M4RC3L07969/analise-engajamento-redes-sociais" target="_blank" rel="noopener">Código no GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section id="sobre">
+    <h2>Sobre o projeto</h2>
+    <p>As redes sociais são um dos principais canais de comunicação entre marcas, criadores de conteúdo e o público. Para decidir <strong>onde, o quê e quando publicar</strong>, é preciso olhar além do número de seguidores e analisar curtidas, comentários, compartilhamentos, visualizações, alcance e taxa de engajamento.</p>
+    <p>Este projeto faz o tratamento, a análise exploratória e a visualização de uma base simulada com publicações de quatro perfis (EducaOnline, GamesBR, ModaHoje e TechBrasil) em seis plataformas (Facebook, Instagram, LinkedIn, TikTok, X e YouTube). Os resultados estão em um notebook de análise e em um dashboard interativo feito com Streamlit.</p>
+  </section>
+
+  <section id="perguntas">
+    <h2>Perguntas de negócio</h2>
+    <ul>
+      <li>Quais plataformas apresentam maior engajamento?</li>
+      <li>Quais tipos de conteúdo possuem melhor desempenho?</li>
+      <li>Existem horários mais favoráveis para publicações?</li>
+      <li>Como o número de seguidores evoluiu ao longo do tempo?</li>
+      <li>Existe relação entre frequência de postagem e alcance?</li>
+      <li>Quais campanhas apresentaram melhores resultados?</li>
+      <li>Quais métricas são mais relevantes para o engajamento?</li>
+    </ul>
+  </section>
+
+  <section id="indicadores">
+    <h2>Indicadores (base completa)</h2>
+    <div class="kpis">
+      <div class="kpi"><span>Total de seguidores</span><strong>2,22 bi</strong><small>soma dos seguidores em cada publicação</small></div>
+      <div class="kpi"><span>Taxa média de engajamento</span><strong>6,24%</strong><small>média de todas as publicações</small></div>
+      <div class="kpi"><span>Plataforma mais engajada</span><strong>LinkedIn</strong><small>6,32% de engajamento médio</small></div>
+      <div class="kpi"><span>Conteúdo com maior alcance</span><strong>Live</strong><small>1,28 milhão de pessoas em média</small></div>
+      <div class="kpi"><span>Total de visualizações</span><strong>4,47 bi</strong><small>somando todas as publicações</small></div>
+      <div class="kpi"><span>Melhor horário de postagem</span><strong>21:00</strong><small>6,38% de engajamento médio</small></div>
+    </div>
+  </section>
+
+  <section id="resultados">
+    <h2>Principais resultados</h2>
+
+    <h3>1. As plataformas têm desempenho muito parecido</h3>
+    <p>O LinkedIn tem a maior taxa média de engajamento e o Instagram a menor, mas a diferença entre eles é de apenas 0,15 ponto percentual e os intervalos de confiança se sobrepõem.</p>
+    <figure>
+      <img src="imagens/02_engajamento_por_plataforma.png" alt="Gráfico de barras com a taxa média de engajamento por plataforma" loading="lazy">
+      <figcaption>Taxa média de engajamento por plataforma, com intervalo de confiança de 95%.</figcaption>
+    </figure>
+
+    <h3>2. O engajamento ficou estável entre 2015 e 2024</h3>
+    <p>A média anual oscila entre 5,99% e 6,52%, sem tendência de alta ou de queda.</p>
+    <figure>
+      <img src="imagens/01_evolucao_engajamento.png" alt="Gráfico de linha com a evolução do engajamento de 2015 a 2024" loading="lazy">
+      <figcaption>Média mensal e média móvel de 12 meses da taxa de engajamento.</figcaption>
+    </figure>
+
+    <h3>3. O melhor horário depende da plataforma</h3>
+    <p>No geral, as publicações das 21:00 engajam mais, mas cada plataforma tem o seu melhor horário. No Instagram, por exemplo, o melhor é 12:00.</p>
+    <figure>
+      <img src="imagens/06_heatmap_horario.png" alt="Heatmap de engajamento médio por horário e plataforma" loading="lazy">
+      <figcaption>Engajamento médio por horário de publicação e plataforma.</figcaption>
+    </figure>
+
+    <h3>4. Mais seguidores não significa mais engajamento</h3>
+    <p>A correlação entre seguidores e taxa de engajamento é de −0,014, praticamente zero. O mesmo vale para frequência de postagem e alcance (−0,019).</p>
+    <figure>
+      <img src="imagens/08_seguidores_x_engajamento.png" alt="Gráfico de dispersão entre seguidores e taxa de engajamento" loading="lazy">
+      <figcaption>Dispersão entre seguidores e taxa de engajamento, com linha de tendência.</figcaption>
+    </figure>
+
+    <h3>5. Melhores combinações de perfil e formato</h3>
+    <p>Como a base não tem uma coluna de campanha, cada combinação de perfil e tipo de conteúdo foi tratada como uma estratégia. A melhor foi <strong>ModaHoje + Vídeo</strong> (6,76%), seguida de EducaOnline + Carrossel e ModaHoje + Stories.</p>
+    <figure>
+      <img src="imagens/12_perfil_x_formato.png" alt="Heatmap de engajamento médio por perfil e tipo de conteúdo" loading="lazy">
+      <figcaption>Engajamento médio por perfil e tipo de conteúdo.</figcaption>
+    </figure>
+
+    <p class="aviso"><strong>Observação:</strong> a base é simulada com valores aleatórios, por isso as diferenças encontradas são pequenas. Um dos aprendizados do projeto é justamente não tomar decisões com base em diferenças mínimas sem testá-las antes.</p>
+  </section>
+
+  <section id="dashboard">
+    <h2>Dashboard interativo</h2>
+    <p>O dashboard em Streamlit permite explorar os dados com filtros e é dividido em quatro páginas:</p>
+    <table>
+      <tr><th>Página</th><th>Conteúdo</th></tr>
+      <tr><td>Visão geral</td><td>Descrição do problema, os 6 KPIs dinâmicos, evolução do engajamento e crescimento de seguidores</td></tr>
+      <tr><td>Plataformas e conteúdo</td><td>Comparação entre plataformas, tipos de conteúdo, ranking de perfis e melhores campanhas</td></tr>
+      <tr><td>Horários e correlações</td><td>Heatmap de horários, seguidores x engajamento, frequência x alcance, matriz de correlação e conteúdos virais</td></tr>
+      <tr><td>Dados e conclusão</td><td>Tabela dinâmica, consultas SQL no banco SQLite, download dos dados filtrados e conclusão executiva</td></tr>
+    </table>
+    <p>Filtros disponíveis: <strong>ano, mês, plataforma, categoria, tipo de conteúdo e perfil</strong>. Todos os indicadores, gráficos e textos de interpretação são recalculados de acordo com os filtros.</p>
+    <p><a class="botao principal" style="border-color: var(--azul); color: #fff; background: var(--azul);" href="https://analise-engajamento-redes-sociais.streamlit.app" target="_blank" rel="noopener">Abrir o dashboard</a></p>
+  </section>
+
+  <section id="tecnologias">
+    <h2>Tecnologias utilizadas</h2>
+    <ul class="tecnologias">
+      <li>Python</li>
+      <li>Pandas</li>
+      <li>NumPy</li>
+      <li>Matplotlib</li>
+      <li>Seaborn</li>
+      <li>Plotly</li>
+      <li>Streamlit</li>
+      <li>SQLAlchemy</li>
+      <li>SQLite</li>
+      <li>GitHub</li>
+      <li>GitHub Pages</li>
+      <li>Streamlit Community Cloud</li>
+    </ul>
+  </section>
+
+  <section id="arquivos">
+    <h2>Arquivos do projeto</h2>
+    <ul>
+      <li><a href="https://github.com/M4RC3L07969/analise-engajamento-redes-sociais#readme" target="_blank" rel="noopener">README</a>: descrição e instruções para executar</li>
+      <li><a href="https://github.com/M4RC3L07969/analise-engajamento-redes-sociais/blob/main/notebooks/analise_redes_sociais.ipynb" target="_blank" rel="noopener">Notebook de análise</a> (<code>notebooks/analise_redes_sociais.ipynb</code>)</li>
+      <li><a href="https://github.com/M4RC3L07969/analise-engajamento-redes-sociais/blob/main/app.py" target="_blank" rel="noopener">Código do dashboard</a> (<code>app.py</code>, <code>utils.py</code> e pasta <code>paginas/</code>)</li>
+      <li><a href="dados/simulacao_redes_sociais_brasil.csv">Base de dados (CSV)</a></li>
+      <li><a href="database/redes_sociais.db">Banco SQLite</a> com a base tratada</li>
+    </ul>
+  </section>
+
+  <section id="conclusao">
+    <h2>Conclusão</h2>
+    <p>O engajamento se manteve estável ao longo dos dez anos e muito parecido entre plataformas, formatos, horários e perfis. Seguidores, frequência de postagem e as demais métricas não têm correlação com a taxa de engajamento. Para dados reais, a recomendação é testar (A/B) as combinações com melhor desempenho, definir o horário de cada plataforma separadamente e acompanhar engajamento e alcance, e não apenas o número de seguidores.</p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    Projeto acadêmico da disciplina Linguagem de Programação: Análise e Visualização de Dados com Python · Marcelo de Moura Maia Júnior · 2026
+  </div>
+</footer>
+
+</body>
+</html>
