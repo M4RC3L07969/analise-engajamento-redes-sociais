@@ -37,9 +37,11 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Total de seguidores", formatar_compacto(kpis["total_seguidores"]),
             help="Soma dos seguidores registrados em cada publicação. "
                  f"Média por publicação: {formatar_numero(kpis['media_seguidores'])}.")
-col2.metric("Taxa média de engajamento", formatar_percentual(kpis["engajamento_medio"]),
-            delta=f"{'+' if diferenca >= 0 else ''}{formatar_numero(diferenca, 2)} p.p. em relação à base completa",
-            delta_color="normal" if abs(diferenca) >= 0.005 else "off")
+# a comparação com a base completa só aparece quando os filtros mudam o resultado
+delta = None
+if abs(diferenca) >= 0.005:
+    delta = f"{'+' if diferenca > 0 else ''}{formatar_numero(diferenca, 2)} p.p. em relação à base completa"
+col2.metric("Taxa média de engajamento", formatar_percentual(kpis["engajamento_medio"]), delta=delta)
 col3.metric("Plataforma mais engajada", kpis["plataforma_top"],
             help=f"Engajamento médio de {formatar_percentual(kpis['plataforma_top_valor'])}")
 
