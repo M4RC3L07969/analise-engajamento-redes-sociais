@@ -1,3 +1,7 @@
+Nome: Marcelo de Moura Maia Júnior
+Professor: Alexandre Neves Louzada
+Matéria: Linguagens de Programação
+
 # Análise de Engajamento em Redes Sociais
 
 Projeto da G1 de Linguagem de Programação (Análise e Visualização de Dados com Python), tema 20: Redes Sociais e Engajamento Digital.

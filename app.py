@@ -18,6 +18,12 @@ pagina = st.navigation([
 ])
 
 st.sidebar.divider()
-st.sidebar.caption("Projeto G1 - Análise e Visualização de Dados com Python\n\nMarcelo de Moura Maia Júnior")
+st.sidebar.title("Dados do projeto")
+st.sidebar.caption(
+    "Nome: Marcelo de Moura Maia Júnior\n"
+    "Professor: Alexandre Neves Louzada\n"
+    "Matéria: Linguagens de Programação\n\n"
+    "Projeto G1 - Análise e Visualização de Dados com Python"
+)
 
 pagina.run()
