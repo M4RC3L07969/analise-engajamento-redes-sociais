@@ -7,7 +7,7 @@ Projeto de análise e visualização de dados sobre engajamento digital em redes
 | O quê | Link |
 |---|---|
 | Página do projeto (GitHub Pages) | https://m4rc3l07969.github.io/analise-engajamento-redes-sociais/ |
-| Dashboard (Streamlit Cloud) | https://analise-engajamento-redes-sociais.streamlit.app |
+| Dashboard (Streamlit Cloud) | https://engajamento-redes-sociais.streamlit.app |
 | Notebook de análise | [`notebooks/analise_redes_sociais.ipynb`](notebooks/analise_redes_sociais.ipynb) |
 
 ## Perguntas orientadoras
