@@ -2,14 +2,10 @@ import streamlit as st
 
 from utils import aplicar_filtros, carregar_dados
 
-st.set_page_config(
-    page_title="Engajamento em Redes Sociais",
-    page_icon="📊",
-    layout="wide",
-)
+st.set_page_config(page_title="Engajamento em Redes Sociais", page_icon="📊", layout="wide")
 
-# os dados vêm do banco SQLite (lido com SQLAlchemy) e os filtros ficam na barra lateral,
-# assim eles continuam valendo quando o usuário troca de página
+# carrega do banco SQLite e aplica os filtros aqui no app.py,
+# assim os filtros continuam valendo quando troca de página
 df = carregar_dados()
 st.session_state["df_completo"] = df
 st.session_state["df_filtrado"] = aplicar_filtros(df)
@@ -22,6 +18,6 @@ pagina = st.navigation([
 ])
 
 st.sidebar.divider()
-st.sidebar.caption("Projeto G1 · Análise e Visualização de Dados com Python · Marcelo de Moura Maia Júnior")
+st.sidebar.caption("Projeto G1 - Análise e Visualização de Dados com Python\n\nMarcelo de Moura Maia Júnior")
 
 pagina.run()

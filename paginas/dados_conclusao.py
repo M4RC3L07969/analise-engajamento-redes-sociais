@@ -6,9 +6,9 @@ df = obter_dados_filtrados()
 
 st.title("Dados e conclusão")
 
-# ---------- tabela dinâmica ----------
+# tabela dinâmica
 st.subheader("Tabela dinâmica")
-st.markdown("Monte a sua própria tabela escolhendo as linhas, as colunas e a métrica.")
+st.write("Escolha o que vai nas linhas, nas colunas e qual métrica calcular.")
 
 dimensoes = {
     "Plataforma": "plataforma",
@@ -51,14 +51,14 @@ if colunas == "(nenhuma)":
 casas = 2 if valor.startswith("Taxa") and agregacao != "Contagem" else 0
 st.dataframe(
     tabela.style.format(lambda v: formatar_numero(v, casas)).background_gradient(cmap="Blues", axis=None),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.divider()
 
-# ---------- consultas SQL ----------
-st.subheader("Consultas ao banco de dados (SQLite + SQLAlchemy)")
-st.markdown("Consultas SQL executadas diretamente no banco `database/redes_sociais.db`, sobre a base completa.")
+# consultas SQL
+st.subheader("Consultas no banco de dados (SQLite + SQLAlchemy)")
+st.write("Consultas SQL feitas direto no banco `database/redes_sociais.db`, com a base completa (sem os filtros).")
 
 consultas = {
     "Engajamento médio por plataforma": """
@@ -69,7 +69,7 @@ SELECT plataforma,
 FROM publicacoes
 GROUP BY plataforma
 ORDER BY engajamento_medio DESC""",
-    "Evolução anual": """
+    "Evolução por ano": """
 SELECT ano,
        ROUND(AVG(taxa_engajamento), 2) AS engajamento_medio,
        ROUND(AVG(seguidores)) AS seguidores_medios,
@@ -102,47 +102,45 @@ GROUP BY horario_publicacao
 ORDER BY horario_publicacao""",
 }
 
-escolha = st.selectbox("Escolha uma consulta", list(consultas.keys()))
+escolha = st.selectbox("Consulta", list(consultas.keys()))
 st.code(consultas[escolha].strip(), language="sql")
-st.dataframe(consultar(consultas[escolha]), use_container_width=True, hide_index=True)
+st.dataframe(consultar(consultas[escolha]), width="stretch", hide_index=True)
 
 st.divider()
 
-# ---------- dados filtrados ----------
+# dados filtrados
 st.subheader("Dados filtrados")
 colunas_exibidas = ["data", "plataforma", "perfil", "categoria", "tipo_conteudo", "horario_publicacao",
                     "seguidores", "curtidas", "comentarios", "compartilhamentos", "visualizacoes",
                     "alcance", "taxa_engajamento", "viral"]
-st.dataframe(df[colunas_exibidas], use_container_width=True, hide_index=True, height=350,
+st.dataframe(df[colunas_exibidas], width="stretch", hide_index=True, height=350,
              column_config={"data": st.column_config.DateColumn("data", format="DD/MM/YYYY")})
 
 csv = df[colunas_exibidas].to_csv(index=False).encode("utf-8-sig")
-st.download_button("Baixar dados filtrados (CSV)", csv, file_name="redes_sociais_filtrado.csv",
-                   mime="text/csv")
+st.download_button("Baixar dados filtrados (CSV)", csv, file_name="redes_sociais_filtrado.csv", mime="text/csv")
 
 st.divider()
 
-# ---------- conclusão executiva ----------
-st.subheader("Conclusão executiva")
+# conclusão
+st.subheader("Conclusão")
 kpis = calcular_kpis(df)
-engajamento_plataforma = df.groupby("plataforma")["taxa_engajamento"].mean()
-amplitude = engajamento_plataforma.max() - engajamento_plataforma.min()
+eng_plataforma = df.groupby("plataforma")["taxa_engajamento"].mean()
+amplitude = eng_plataforma.max() - eng_plataforma.min()
 
 st.markdown(
     f"""
-- **Engajamento estável:** a taxa média é de **{formatar_percentual(kpis['engajamento_medio'])}** e quase não muda
-  ao longo dos anos.
-- **Plataformas parecidas:** **{kpis['plataforma_top']}** lidera, mas a diferença entre a melhor e a pior
-  plataforma é de só **{formatar_numero(amplitude, 2)} ponto percentual**.
-- **Formato e horário:** **{kpis['conteudo_maior_alcance']}** tem o maior alcance médio e as
-  **{kpis['melhor_horario']}** é o horário com maior engajamento, mas o melhor horário varia por plataforma.
-- **Seguidores e frequência não garantem resultado:** não há correlação entre seguidores e engajamento,
-  nem entre quantidade de publicações e alcance.
-- **Base simulada:** os dados foram gerados de forma aleatória, por isso as diferenças são pequenas.
-  O principal aprendizado é não tomar decisões com base em diferenças mínimas sem testar antes.
+- A taxa média de engajamento é de {formatar_percentual(kpis['engajamento_medio'])} e quase não muda de um ano
+  pro outro.
+- O {kpis['plataforma_top']} é a plataforma com mais engajamento, mas a diferença entre a melhor e a pior é de só
+  {formatar_numero(amplitude, 2)} ponto percentual.
+- {kpis['conteudo_maior_alcance']} é o formato com maior alcance médio e {kpis['melhor_horario']} é o horário com
+  mais engajamento, mas o melhor horário muda conforme a plataforma.
+- Não tem correlação entre seguidores e engajamento, nem entre quantidade de posts e alcance.
+- Como a base é simulada com valores aleatórios, as diferenças são pequenas. O principal aprendizado é não
+  tomar decisão em cima de diferenças tão pequenas sem testar antes.
 
-**Recomendações:** testar (A/B) as combinações de perfil e formato com melhor desempenho, definir horários
-por plataforma, acompanhar engajamento e alcance além dos seguidores e, em dados reais, incluir informações
-de campanha e investimento para medir o retorno.
+**Recomendações:** testar (teste A/B) as combinações de perfil e formato que foram melhor, escolher o horário de
+cada plataforma separado, acompanhar engajamento e alcance e não só seguidores e, com dados reais, incluir
+informações de campanha e investimento pra medir o retorno.
 """
 )

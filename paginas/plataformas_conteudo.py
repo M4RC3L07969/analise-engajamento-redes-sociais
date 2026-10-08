@@ -7,11 +7,11 @@ from utils import (COR_PRINCIPAL, CORES_PLATAFORMA, METRICAS, agrupar, formatar_
 df = obter_dados_filtrados()
 
 st.title("Plataformas e conteúdo")
-st.markdown("Comparação do desempenho entre plataformas, tipos de conteúdo e perfis.")
+st.write("Comparação entre plataformas, tipos de conteúdo e perfis.")
 
 metrica = st.selectbox("Métrica para comparar", list(METRICAS.keys()))
 
-# ---------- plataformas ----------
+# plataformas
 st.subheader("Comparação entre plataformas")
 por_plataforma = agrupar(df, "plataforma", metrica)
 por_plataforma["rotulo"] = por_plataforma["valor"].apply(lambda v: formatar_metrica(v, metrica))
@@ -19,21 +19,21 @@ por_plataforma["rotulo"] = por_plataforma["valor"].apply(lambda v: formatar_metr
 fig = px.bar(por_plataforma, x="plataforma", y="valor", color="plataforma", text="rotulo",
              color_discrete_map=CORES_PLATAFORMA, labels={"plataforma": "", "valor": metrica})
 fig.update_traces(textposition="outside", hovertemplate="%{x}: %{text}<extra></extra>")
-fig.update_layout(template="plotly_white", showlegend=False, height=400, margin=dict(t=30, b=10))
-st.plotly_chart(fig, use_container_width=True)
+fig.update_layout(showlegend=False, height=400, margin=dict(t=30, b=10))
+st.plotly_chart(fig, width="stretch")
 
 if len(por_plataforma) > 1:
     melhor, pior = por_plataforma.iloc[0], por_plataforma.iloc[-1]
-    diferenca_pct = (melhor["valor"] / pior["valor"] - 1) * 100
+    diferenca = (melhor["valor"] / pior["valor"] - 1) * 100
     st.info(
-        f"**Interpretação:** em *{metrica.lower()}*, **{melhor['plataforma']}** lidera com "
-        f"{melhor['rotulo']} e **{pior['plataforma']}** fica em último com {pior['rotulo']}, "
-        f"uma diferença de apenas {formatar_numero(diferenca_pct, 1)}%. As plataformas têm desempenho "
-        "muito parecido, então a escolha da plataforma sozinha não explica o engajamento."
+        f"Em {metrica.lower()}, o {melhor['plataforma']} fica em primeiro ({melhor['rotulo']}) e o "
+        f"{pior['plataforma']} em último ({pior['rotulo']}). A diferença é de só "
+        f"{formatar_numero(diferenca, 1)}%, ou seja, as plataformas estão bem parecidas e a plataforma "
+        "sozinha não explica o engajamento."
     )
 
-# ---------- tipos de conteúdo ----------
-st.subheader("Comparação entre tipos de conteúdo")
+# tipos de conteúdo
+st.subheader("Tipos de conteúdo")
 col1, col2 = st.columns([3, 2])
 
 por_conteudo = agrupar(df, "tipo_conteudo", metrica)
@@ -42,9 +42,8 @@ fig = px.bar(por_conteudo, x="valor", y="tipo_conteudo", orientation="h", text="
              labels={"tipo_conteudo": "", "valor": metrica})
 fig.update_traces(marker_color=COR_PRINCIPAL, textposition="outside",
                   hovertemplate="%{y}: %{text}<extra></extra>")
-fig.update_layout(template="plotly_white", height=360, margin=dict(t=20, b=10),
-                  yaxis=dict(categoryorder="total ascending"))
-col1.plotly_chart(fig, use_container_width=True)
+fig.update_layout(height=360, margin=dict(t=20, b=10), yaxis=dict(categoryorder="total ascending"))
+col1.plotly_chart(fig, width="stretch")
 
 resumo = df.groupby("tipo_conteudo").agg(
     publicacoes=("taxa_engajamento", "size"),
@@ -53,38 +52,37 @@ resumo = df.groupby("tipo_conteudo").agg(
 ).sort_values("engajamento", ascending=False)
 col2.dataframe(
     resumo,
-    use_container_width=True,
+    width="stretch",
     column_config={
         "publicacoes": st.column_config.NumberColumn("Publicações"),
         "engajamento": st.column_config.NumberColumn("Engajamento (%)", format="%.2f"),
         "alcance": st.column_config.NumberColumn("Alcance médio", format="%.0f"),
     },
 )
-melhor_eng = resumo["engajamento"].idxmax()
-melhor_alc = resumo["alcance"].idxmax()
-col2.info(
-    f"**{melhor_eng}** tem o maior engajamento médio ({formatar_percentual(resumo['engajamento'].max())}) "
-    f"e **{melhor_alc}** o maior alcance médio ({formatar_compacto(resumo['alcance'].max())} de pessoas)."
+col2.write(
+    f"{resumo['engajamento'].idxmax()} tem o maior engajamento médio "
+    f"({formatar_percentual(resumo['engajamento'].max())}) e {resumo['alcance'].idxmax()} o maior alcance "
+    f"médio ({formatar_compacto(resumo['alcance'].max())} de pessoas)."
 )
 
-# ---------- plataforma x conteúdo ----------
+# plataforma x conteúdo
 st.subheader("Engajamento por plataforma e tipo de conteúdo")
 tabela = df.pivot_table(index="tipo_conteudo", columns="plataforma", values="taxa_engajamento", aggfunc="mean")
 fig = px.imshow(tabela, text_auto=".2f", color_continuous_scale="Blues", aspect="auto",
                 labels={"x": "", "y": "", "color": "Engajamento (%)"})
 fig.update_layout(height=380, margin=dict(t=20, b=10))
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 combinacoes = tabela.stack().sort_values(ascending=False)
 if len(combinacoes) > 1:
     (tipo_top, plat_top), valor_top = combinacoes.index[0], combinacoes.iloc[0]
     st.info(
-        f"**Interpretação:** a melhor combinação é **{tipo_top} no {plat_top}** "
-        f"({formatar_percentual(valor_top)}). Como cada combinação tem bem menos publicações do que o total, "
-        "parte dessas diferenças pode ser só variação aleatória e precisaria ser confirmada com mais dados."
+        f"A melhor combinação é {tipo_top} no {plat_top} ({formatar_percentual(valor_top)}). "
+        "Só que cada combinação tem bem menos publicações que o total, então parte dessa diferença pode "
+        "ser só variação aleatória."
     )
 
-# ---------- ranking de perfis ----------
+# ranking de perfis
 st.subheader("Ranking de perfis")
 ranking = df.groupby("perfil").agg(
     engajamento=("taxa_engajamento", "mean"),
@@ -97,7 +95,7 @@ ranking.insert(0, "posicao", range(1, len(ranking) + 1))
 
 st.dataframe(
     ranking,
-    use_container_width=True,
+    width="stretch",
     column_config={
         "posicao": st.column_config.NumberColumn("Posição", format="%dº"),
         "engajamento": st.column_config.ProgressColumn(
@@ -109,7 +107,7 @@ st.dataframe(
     },
 )
 
-# campanhas = combinação de perfil e formato (a base não tem coluna de campanha)
+# a base não tem coluna de campanha, então usei perfil + formato como se fosse a campanha
 st.subheader("Melhores campanhas (perfil + formato)")
 campanhas = (df.groupby(["perfil", "tipo_conteudo"])
              .agg(publicacoes=("taxa_engajamento", "size"),
@@ -120,7 +118,7 @@ campanhas = (df.groupby(["perfil", "tipo_conteudo"])
              .head(5))
 st.dataframe(
     campanhas,
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     column_config={
         "perfil": "Perfil",
@@ -130,5 +128,5 @@ st.dataframe(
         "alcance": st.column_config.NumberColumn("Alcance médio", format="%.0f"),
     },
 )
-st.caption("Como a base não possui uma coluna de campanha, cada combinação de perfil e tipo de conteúdo "
-           "foi tratada como uma estratégia de campanha.")
+st.caption("Como a base não tem uma coluna de campanha, cada combinação de perfil e tipo de conteúdo "
+           "foi considerada uma campanha.")

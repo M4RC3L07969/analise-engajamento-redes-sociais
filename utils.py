@@ -1,4 +1,3 @@
-"""Funções compartilhadas pelas páginas do dashboard."""
 from pathlib import Path
 
 import pandas as pd
@@ -9,6 +8,7 @@ PASTA_PROJETO = Path(__file__).parent
 CAMINHO_CSV = PASTA_PROJETO / "dados" / "simulacao_redes_sociais_brasil.csv"
 CAMINHO_BANCO = PASTA_PROJETO / "database" / "redes_sociais.db"
 
+# mesmas cores do notebook
 CORES_PLATAFORMA = {
     "Facebook": "#2a78d6",
     "Instagram": "#eb6834",
@@ -17,12 +17,18 @@ CORES_PLATAFORMA = {
     "X": "#e87ba4",
     "YouTube": "#008300",
 }
+CORES_PERFIL = {
+    "EducaOnline": "#2a78d6",
+    "GamesBR": "#eb6834",
+    "ModaHoje": "#1baf7a",
+    "TechBrasil": "#e87ba4",
+}
 COR_PRINCIPAL = "#2a78d6"
-CORES_PERFIL = {"EducaOnline": "#2a78d6", "GamesBR": "#eb6834", "ModaHoje": "#1baf7a", "TechBrasil": "#e87ba4"}
 
 NOMES_MESES = {1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun",
                7: "Jul", 8: "Ago", 9: "Set", 10: "Out", 11: "Nov", 12: "Dez"}
 
+# nome que aparece na tela: (coluna, agregação)
 METRICAS = {
     "Taxa média de engajamento (%)": ("taxa_engajamento", "mean"),
     "Alcance médio": ("alcance", "mean"),
@@ -32,15 +38,13 @@ METRICAS = {
 }
 
 
-# ---------- banco de dados ----------
-
 @st.cache_resource
 def obter_engine():
     return create_engine(f"sqlite:///{CAMINHO_BANCO}")
 
 
+# mesmo tratamento do notebook, usado só se o banco não existir
 def preparar_base(df):
-    """Mesmo tratamento feito no notebook (usado se o banco ainda não existir)."""
     df = df.copy()
     df["hora"] = df["horario_publicacao"].str[:2].astype(int)
     df["interacoes"] = df["curtidas"] + df["comentarios"] + df["compartilhamentos"]
@@ -61,7 +65,6 @@ def criar_banco(engine):
 
 @st.cache_data
 def carregar_dados():
-    # se o banco ainda não existir (ex.: primeira execução), ele é criado a partir do CSV
     if not CAMINHO_BANCO.exists():
         criar_banco(obter_engine())
 
@@ -76,24 +79,26 @@ def consultar(sql):
     return pd.read_sql(sql, obter_engine())
 
 
-# ---------- filtros ----------
-
-def filtro_multiplo(rotulo, opcoes, chave):
-    return st.sidebar.multiselect(rotulo, opcoes, default=opcoes, key=chave)
-
-
 def aplicar_filtros(df):
     st.sidebar.header("Filtros")
 
     ano_min, ano_max = int(df["ano"].min()), int(df["ano"].max())
     anos = st.sidebar.slider("Ano", ano_min, ano_max, (ano_min, ano_max), key="filtro_ano")
 
-    meses = st.sidebar.multiselect("Mês", list(NOMES_MESES.values()),
-                                   default=list(NOMES_MESES.values()), key="filtro_mes")
-    plataformas = filtro_multiplo("Plataforma", sorted(df["plataforma"].unique()), "filtro_plataforma")
-    categorias = filtro_multiplo("Categoria", sorted(df["categoria"].unique()), "filtro_categoria")
-    tipos = filtro_multiplo("Tipo de conteúdo", sorted(df["tipo_conteudo"].unique()), "filtro_tipo")
-    perfis = filtro_multiplo("Perfil", sorted(df["perfil"].unique()), "filtro_perfil")
+    todos_meses = list(NOMES_MESES.values())
+    meses = st.sidebar.multiselect("Mês", todos_meses, default=todos_meses, key="filtro_mes")
+
+    plataformas = sorted(df["plataforma"].unique())
+    plataformas = st.sidebar.multiselect("Plataforma", plataformas, default=plataformas, key="filtro_plataforma")
+
+    categorias = sorted(df["categoria"].unique())
+    categorias = st.sidebar.multiselect("Categoria", categorias, default=categorias, key="filtro_categoria")
+
+    tipos = sorted(df["tipo_conteudo"].unique())
+    tipos = st.sidebar.multiselect("Tipo de conteúdo", tipos, default=tipos, key="filtro_tipo")
+
+    perfis = sorted(df["perfil"].unique())
+    perfis = st.sidebar.multiselect("Perfil", perfis, default=perfis, key="filtro_perfil")
 
     filtro = (
         df["ano"].between(anos[0], anos[1])
@@ -105,22 +110,21 @@ def aplicar_filtros(df):
     )
     df_filtrado = df[filtro]
 
-    st.sidebar.caption(f"{formatar_numero(len(df_filtrado))} de {formatar_numero(len(df))} publicações selecionadas")
+    st.sidebar.caption(f"{formatar_numero(len(df_filtrado))} de {formatar_numero(len(df))} publicações")
     return df_filtrado
 
 
+# as páginas pegam a base já filtrada no app.py
 def obter_dados_filtrados():
-    """Usado pelas páginas: pega a base já filtrada no app.py."""
     df = st.session_state.get("df_filtrado")
     if df is None or df.empty:
-        st.warning("Nenhuma publicação encontrada com os filtros selecionados. Ajuste os filtros na barra lateral.")
+        st.warning("Nenhuma publicação com esses filtros. Muda alguma opção na barra lateral.")
         st.stop()
     return df
 
 
-# ---------- KPIs e formatação ----------
-
 def formatar_numero(valor, casas=0):
+    # 1,234.5 -> 1.234,5
     texto = f"{valor:,.{casas}f}"
     return texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -141,26 +145,26 @@ def formatar_percentual(valor, casas=2):
 
 def formatar_correlacao(valor):
     if pd.isna(valor):
-        return "—"
+        return "-"
     return formatar_numero(valor, 3)
 
 
 def calcular_kpis(df):
-    engajamento_plataforma = df.groupby("plataforma")["taxa_engajamento"].mean()
+    eng_plataforma = df.groupby("plataforma")["taxa_engajamento"].mean()
     alcance_conteudo = df.groupby("tipo_conteudo")["alcance"].mean()
-    engajamento_horario = df.groupby("horario_publicacao")["taxa_engajamento"].mean()
+    eng_horario = df.groupby("horario_publicacao")["taxa_engajamento"].mean()
 
     return {
         "total_seguidores": df["seguidores"].sum(),
         "media_seguidores": df["seguidores"].mean(),
         "engajamento_medio": df["taxa_engajamento"].mean(),
-        "plataforma_top": engajamento_plataforma.idxmax(),
-        "plataforma_top_valor": engajamento_plataforma.max(),
+        "plataforma_top": eng_plataforma.idxmax(),
+        "plataforma_top_valor": eng_plataforma.max(),
         "conteudo_maior_alcance": alcance_conteudo.idxmax(),
         "conteudo_maior_alcance_valor": alcance_conteudo.max(),
         "total_visualizacoes": df["visualizacoes"].sum(),
-        "melhor_horario": engajamento_horario.idxmax(),
-        "melhor_horario_valor": engajamento_horario.max(),
+        "melhor_horario": eng_horario.idxmax(),
+        "melhor_horario_valor": eng_horario.max(),
     }
 
 
