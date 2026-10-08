@@ -4,8 +4,6 @@ from utils import aplicar_filtros, carregar_dados
 
 st.set_page_config(page_title="Engajamento em Redes Sociais", page_icon="📊", layout="wide")
 
-# carrega do banco SQLite e aplica os filtros aqui no app.py,
-# assim os filtros continuam valendo quando troca de página
 df = carregar_dados()
 st.session_state["df_completo"] = df
 st.session_state["df_filtrado"] = aplicar_filtros(df)
@@ -17,12 +15,10 @@ pagina = st.navigation([
     st.Page("paginas/dados_conclusao.py", title="Dados e conclusão", icon=":material/table_chart:"),
 ])
 
-st.sidebar.divider()
-st.sidebar.title("Dados do projeto")
-st.sidebar.caption(
-    "Nome: Marcelo de Moura Maia Júnior\n"
-    "Professor: Alexandre Neves Louzada\n"
-    "Matéria: Linguagens de Programação\n\n"
+st.caption(
+    "**Nome:** Marcelo de Moura Maia Júnior  |  "
+    "**Professor:** Alexandre Neves Louzada  |  "
+    "**Matéria:** Linguagens de Programação  |  "
     "Projeto G1 - Análise e Visualização de Dados com Python"
 )
 
